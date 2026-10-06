@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CritAlert — Doctor Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f3f4f8;--card:#fff;--card2:#f8f9fc;
+  --border:#e0e4ef;--border2:#c5ccdc;
+  --text:#101828;--t2:#374151;--muted:#6b7280;--muted2:#9ca3af;
+  --red:#d92d20;--red-s:#fff1f0;--red-b:#ffc9c5;
+  --green:#027a48;--grn-s:#ecfdf3;--grn-b:#abefc6;--grn-m:#17b26a;
+  --blue:#1849a9;--blu-s:#eff4ff;--blu-b:#c7d7fd;
+  --amber:#b54708;--amb-s:#fffaeb;--amb-b:#fedf89;
+  --mono:'IBM Plex Mono',monospace;
+  --r:10px;--sh:0 1px 3px rgba(16,24,40,.06);--sh2:0 8px 24px rgba(16,24,40,.1);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* ─ Header ─ */
+.hdr{background:var(--card);border-bottom:1px solid var(--border);height:58px;padding:0 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;box-shadow:var(--sh)}
+.logo{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:700;letter-spacing:-.4px}
+.logo-sq{width:30px;height:30px;background:var(--red);border-radius:7px;
+  display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800}
+.logo em{color:var(--red);font-style:normal}
+.hdr-mid{display:flex;align-items:center;gap:7px}
+.conn-dot{width:7px;height:7px;border-radius:50%;background:var(--grn-m);animation:blink 2s infinite}
+.conn-dot.off{background:var(--red);animation:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.conn-txt{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.hdr-right{display:flex;align-items:center;gap:9px}
+.crit-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;
+  background:var(--red-s);color:var(--red);border:1px solid var(--red-b);display:none}
+.crit-pill.show{display:inline-block}
+.role-tag{font-size:11px;font-weight:600;padding:3px 11px;border-radius:20px;
+  background:var(--blu-s);color:var(--blue);border:1px solid var(--blu-b)}
+.logout-btn{font-size:11px;font-weight:600;padding:4px 11px;border-radius:20px;
+  background:var(--card2);color:var(--muted);border:1px solid var(--border);
+  text-decoration:none;transition:all .15s}
+.logout-btn:hover{border-color:var(--border2);color:var(--text)}
+
+/* ─ Page ─ */
+.page{max-width:1040px;margin:0 auto;padding:22px 18px 64px}
+
+/* ─ Stats ─ */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;box-shadow:var(--sh)}
+.stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--muted);margin-bottom:6px}
+.stat-val{font-size:28px;font-weight:700;font-family:var(--mono);line-height:1}
+.stat-sub{font-size:11px;color:var(--muted2);margin-top:3px}
+
+/* ─ Panels ─ */
+.panels{display:grid;grid-template-columns:1.6fr 1fr;gap:12px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  box-shadow:var(--sh);overflow:hidden}
+.ph{display:flex;align-items:center;justify-content:space-between;
+  padding:11px 16px;border-bottom:1px solid var(--border)}
+.ph-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--t2)}
+.tabs{display:flex;gap:3px}
+.tab{font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;
+  cursor:pointer;color:var(--muted);border:1px solid transparent;transition:all .12s}
+.tab.act{background:var(--card2);color:var(--text);border-color:var(--border)}
+
+/* ─ Alert list ─ */
+.a-list{min-height:60px}
+.a-item{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;
+  border-bottom:1px solid var(--border);cursor:pointer;border-left:3px solid var(--red);
+  transition:background .1s}
+.a-item:last-child{border-bottom:none}
+.a-item:hover{background:var(--card2)}
+.a-item.sel{background:var(--blu-s);border-left-color:var(--blue)}
+.a-item.acked{opacity:.4}
+.ai-info{flex:1;min-width:0}
+.ai-name{font-size:13px;font-weight:600}
+.ai-sub{font-size:11px;color:var(--muted);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-right{text-align:right;flex-shrink:0}
+.ai-time{font-size:10px;color:var(--muted2);font-family:var(--mono)}
+
+.badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;
+  display:inline-block;text-transform:uppercase;letter-spacing:.4px}
+.b-crit{background:var(--red-s);color:var(--red);border:1px solid var(--red-b)}
+.b-acked{background:var(--grn-s);color:var(--green);border:1px solid var(--grn-b)}
+.b-pend{background:var(--amb-s);color:var(--amber);border:1px solid var(--amb-b)}
+
+/* ─ Detail panel ─ */
+.detail-body{padding:15px}
+.d-name{font-size:16px;font-weight:700;margin-bottom:2px}
+.d-id{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:12px}
+.d-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px}
+.d-box{background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:9px 11px}
+.d-box-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.4px;margin-bottom:3px}
+.d-box-val{font-size:12px;font-weight:600;font-family:var(--mono)}
+.d-box-val.red{color:var(--red)}
+.reason-strip{background:var(--red-s);border:1px solid var(--red-b);border-radius:7px;
+  padding:10px 13px;font-size:12px;font-weight:600;color:var(--red);
+  line-height:1.5;margin-bottom:12px}
+
+/* ─ Image viewer in detail ─ */
+.img-viewer{background:var(--card2);border:1px solid var(--border);border-radius:8px;
+  padding:12px;margin-bottom:12px;text-align:center}
+.iv-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--muted);margin-bottom:9px;text-align:left;display:flex;
+  align-items:center;justify-content:space-between}
+.iv-img{max-width:100%;max-height:260px;border-radius:5px;
+  border:1px solid var(--border);display:block;margin:0 auto;cursor:zoom-in;
+  transition:transform .2s}
+.iv-img:hover{transform:scale(1.02)}
+.iv-btns{display:flex;gap:8px;margin-top:10px;justify-content:center}
+.iv-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;
+  border-radius:7px;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;
+  cursor:pointer;text-decoration:none;border:1px solid;transition:all .15s}
+.iv-btn-view{background:var(--blu-s);color:var(--blue);border-color:var(--blu-b)}
+.iv-btn-view:hover{background:#e0edff}
+.iv-btn-dl{background:var(--grn-s);color:var(--green);border-color:var(--grn-b)}
+.iv-btn-dl:hover{background:#d1fae5}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:8px 16px;border-radius:var(--r);font-size:12px;font-weight:600;
+  cursor:pointer;border:1px solid var(--border);background:var(--card2);
+  color:var(--t2);font-family:'Inter',sans-serif;transition:all .12s}
+.btn:hover{border-color:var(--border2)}
+.btn-ack{background:var(--grn-s);color:var(--green);border-color:var(--grn-b)}
+.btn-ack:hover{background:#d1fae5}
+
+/* ─ Log ─ */
+.log-wrap{max-height:320px;overflow-y:auto}
+.log-row{display:flex;gap:9px;padding:7px 14px;border-bottom:1px solid var(--border);font-size:11px}
+.log-row:last-child{border-bottom:none}
+.log-ts{font-family:var(--mono);color:var(--muted2);flex-shrink:0}
+
+/* ─ Empty ─ */
+.empty{text-align:center;padding:32px 16px;color:var(--muted)}
+.empty-icon{font-size:26px;margin-bottom:8px}
+.empty-txt{font-size:12px}
+
+/* ─ Toast ─ */
+.toast{position:fixed;bottom:18px;right:18px;background:var(--card);
+  border:1px solid var(--grn-b);color:var(--green);padding:10px 16px;
+  border-radius:var(--r);font-size:12px;font-weight:600;
+  opacity:0;transform:translateY(5px);transition:all .25s;
+  pointer-events:none;z-index:9000;box-shadow:var(--sh2)}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.err{border-color:var(--red-b);color:var(--red)}
+
+/* ─ Popup overlay ─ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);
+  display:flex;align-items:center;justify-content:center;
+  z-index:1000;opacity:0;pointer-events:none;
+  transition:opacity .2s;backdrop-filter:blur(4px)}
+.overlay.show{opacity:1;pointer-events:all}
+.popup{background:var(--card);border:1px solid var(--border);
+  border-top:4px solid var(--red);border-radius:12px;padding:24px 26px;
+  max-width:440px;width:94%;box-shadow:var(--sh2);animation:popIn .25s ease}
+@keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.pop-badge{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.pop-dot{width:9px;height:9px;border-radius:50%;background:var(--red);animation:blink .8s infinite}
+.pop-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--red)}
+.pop-name{font-size:20px;font-weight:700;margin-bottom:3px}
+.pop-pid{font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:12px}
+.pop-finding{background:var(--red-s);border:1px solid var(--red-b);border-radius:7px;
+  padding:9px 13px;margin-bottom:10px}
+.pop-finding-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.4px;margin-bottom:3px}
+.pop-finding-val{font-size:13px;font-weight:700;font-family:var(--mono);color:var(--red)}
+.pop-reason{font-size:12px;color:var(--t2);line-height:1.55;margin-bottom:14px;
+  background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:9px 12px}
+
+/* Image preview in popup */
+.pop-img-wrap{margin-bottom:14px;text-align:center}
+.pop-img-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--muted);margin-bottom:7px;text-align:left}
+.pop-img{max-width:100%;max-height:180px;border-radius:6px;
+  border:1px solid var(--border);display:block;margin:0 auto}
+.pop-img-btns{display:flex;gap:7px;margin-top:8px;justify-content:center}
+.pib{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;
+  border-radius:6px;font-size:11px;font-weight:600;font-family:'Inter',sans-serif;
+  cursor:pointer;text-decoration:none;border:1px solid;transition:all .15s}
+.pib-v{background:var(--blu-s);color:var(--blue);border-color:var(--blu-b)}
+.pib-d{background:var(--grn-s);color:var(--green);border-color:var(--grn-b)}
+
+.pop-btns{display:flex;gap:8px}
+.pop-ack{flex:1;padding:11px;background:var(--grn-m);color:#fff;border:none;
+  border-radius:var(--r);font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer}
+.pop-ack:hover{background:var(--green)}
+.pop-later{padding:11px 15px;background:var(--card2);color:var(--muted);
+  border:1px solid var(--border);border-radius:var(--r);font-size:12px;
+  font-weight:600;font-family:'Inter',sans-serif;cursor:pointer}
+
+@media(max-width:680px){
+  .panels{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .hdr{padding:0 14px}
+  .hdr-mid{display:none}
+  .page{padding:14px 12px 50px}
+}
+</style>
+</head>
+<body>
+
+<!-- Popup -->
+<div class="overlay" id="overlay">
+  <div class="popup">
+    <div class="pop-badge"><div class="pop-dot"></div><div class="pop-lbl">Critical Alert — Immediate Action</div></div>
+    <div class="pop-name" id="pp-name">—</div>
+    <div class="pop-pid" id="pp-pid">—</div>
+    <div class="pop-finding">
+      <div class="pop-finding-lbl">Primary Finding</div>
+      <div class="pop-finding-val" id="pp-param">—</div>
+    </div>
+    <div class="pop-reason" id="pp-reason">—</div>
+    <!-- Image in popup -->
+    <div class="pop-img-wrap" id="pp-img-wrap" style="display:none">
+      <div class="pop-img-lbl">📷 Patient Report Image</div>
+      <img class="pop-img" id="pp-img" src="" alt="Report image">
+      <div class="pop-img-btns">
+        <a class="pib pib-v" id="pp-view-btn" href="#" target="_blank">👁 View Full</a>
+        <a class="pib pib-d" id="pp-dl-btn" href="#" download>⬇ Download</a>
+      </div>
+    </div>
+    <div class="pop-btns">
+      <button class="pop-ack" onclick="ackPopup()">✓ Acknowledge &amp; Treat</button>
+      <button class="pop-later" onclick="closePopup()">View Later</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<header class="hdr">
+  <div class="logo"><div class="logo-sq">CA</div><span><em>Crit</em>Alert</span></div>
+  <div class="hdr-mid">
+    <span class="conn-dot" id="cdot"></span>
+    <span class="conn-txt" id="ctxt">Connecting…</span>
+  </div>
+  <div class="hdr-right">
+    <span class="crit-pill" id="cpill">0 Critical</span>
+    <div class="role-tag">👨‍⚕️ Doctor</div>
+    <a href="/doctor/logout" class="logout-btn">Sign Out</a>
+  </div>
+</header>
+
+<main class="page">
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-lbl">Active Alerts</div>
+      <div class="stat-val" id="s-active">0</div>
+      <div class="stat-sub">Unacknowledged</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Critical</div>
+      <div class="stat-val" id="s-crit" style="color:var(--red)">0</div>
+      <div class="stat-sub">Needs attention</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Acknowledged</div>
+      <div class="stat-val" id="s-acked" style="color:var(--green)">0</div>
+      <div class="stat-sub">Responded</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Total Received</div>
+      <div class="stat-val" id="s-total">0</div>
+      <div class="stat-sub">From path lab</div>
+    </div>
+  </div>
+
+  <div class="panels">
+    <!-- Queue -->
+    <div class="panel">
+      <div class="ph">
+        <span class="ph-title">Alert Queue</span>
+        <div class="tabs">
+          <span class="tab act" id="tq" onclick="switchTab('q')">Queue</span>
+          <span class="tab" id="tl" onclick="switchTab('l')">Audit Log</span>
+        </div>
+      </div>
+      <div id="vq"><div class="a-list" id="a-list">
+        <div class="empty"><div class="empty-icon">📡</div><div class="empty-txt">Waiting for alerts…</div></div>
+      </div></div>
+      <div id="vl" style="display:none">
+        <div class="log-wrap" id="log-list">
+          <div class="empty"><div class="empty-txt">No audit events yet</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail -->
+    <div class="panel">
+      <div class="ph"><span class="ph-title">Alert Detail</span></div>
+      <div id="detail">
+        <div class="empty" style="padding-top:36px">
+          <div class="empty-icon">🔔</div>
+          <div class="empty-txt">Select an alert to view details</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const FLASK='http://127.0.0.1:5000';
+let alerts=[],auditLog=[],knownIds=new Set(),selId=null,popId=null;
+const $=id=>document.getElementById(id);
+const fmtT=ts=>{const d=new Date(ts*1000);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');};
+const fmtAgo=ts=>{const s=Math.floor(Date.now()/1000-ts);return s<60?s+'s ago':s<3600?Math.floor(s/60)+'m ago':Math.floor(s/3600)+'h ago';};
+function toast(msg,err=false){const t=$('toast');t.textContent=msg;t.className='toast show'+(err?' err':'');setTimeout(()=>t.className='toast',2800);}
+
+function renderList(){
+  const el=$('a-list');
+  const vis=alerts.filter(a=>a.status!=='dismissed');
+  if(!vis.length){el.innerHTML='<div class="empty"><div class="empty-icon">📡</div><div class="empty-txt">Waiting for alerts from path lab…</div></div>';return;}
+  el.innerHTML=vis.map(a=>`
+    <div class="a-item ${a.id===selId?'sel':''} ${a.status==='acked'?'acked':''}" onclick="selAlert('${a.id}')">
+      <div style="padding-top:3px"><span class="badge b-crit">CRIT</span></div>
+      <div class="ai-info">
+        <div class="ai-name">${a.patient}</div>
+        <div class="ai-sub">${a.source} · ${a.parameter||'Critical finding'}</div>
+      </div>
+      <div class="ai-right">
+        <div class="ai-time">${fmtAgo(a.timestamp)}</div>
+        <span class="badge ${a.status==='acked'?'b-acked':'b-pend'}" style="margin-top:3px;display:inline-block">
+          ${a.status==='acked'?'Acked':'Pending'}
+        </span>
+      </div>
+    </div>`).join('');
+}
+
+function buildImgSection(a, size='detail'){
+  if(!a.image_filename) return '';
+  const viewUrl=`${FLASK}/view_image/${encodeURIComponent(a.image_filename)}`;
+  const dlUrl=`${FLASK}/download_image/${encodeURIComponent(a.image_filename)}`;
+  if(size==='popup'){
+    return `<div class="pop-img-wrap" style="display:block">
+      <div class="pop-img-lbl">📷 Patient Report Image</div>
+      <img class="pop-img" src="${viewUrl}" alt="Report">
+      <div class="pop-img-btns">
+        <a class="pib pib-v" href="${viewUrl}" target="_blank">👁 View Full</a>
+        <a class="pib pib-d" href="${dlUrl}" download>⬇ Download</a>
+      </div>
+    </div>`;
+  }
+  return `<div class="img-viewer">
+    <div class="iv-title">
+      <span>📷 Patient Report Image</span>
+    </div>
+    <img class="iv-img" src="${viewUrl}" alt="Report image" onclick="window.open('${viewUrl}','_blank')">
+    <div class="iv-btns">
+      <a class="iv-btn iv-btn-view" href="${viewUrl}" target="_blank">👁 View Full Size</a>
+      <a class="iv-btn iv-btn-dl" href="${dlUrl}" download>⬇ Download Image</a>
+    </div>
+  </div>`;
+}
+
+function selAlert(id){
+  selId=id; renderList();
+  const a=alerts.find(x=>x.id===id); if(!a) return;
+  $('detail').innerHTML=`
+    <div class="detail-body">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
+        <div><div class="d-name">${a.patient}</div><div class="d-id">${a.pid} · ${a.id}</div></div>
+        <span class="badge b-crit" style="font-size:10px;padding:3px 9px">CRITICAL</span>
+      </div>
+      <div class="d-grid">
+        <div class="d-box"><div class="d-box-lbl">Finding</div><div class="d-box-val red">${a.parameter||'—'}</div></div>
+        <div class="d-box"><div class="d-box-lbl">Source</div><div class="d-box-val">${a.source}</div></div>
+        <div class="d-box"><div class="d-box-lbl">Alert ID</div><div class="d-box-val">${a.id}</div></div>
+        <div class="d-box"><div class="d-box-lbl">Received</div><div class="d-box-val">${fmtT(a.timestamp)}</div></div>
+      </div>
+      <div class="reason-strip">⚠ ${a.reason||'—'}</div>
+      ${buildImgSection(a,'detail')}
+      <div class="actions">
+        <button class="btn btn-ack" onclick="doAck('${a.id}')">✓ Acknowledge &amp; Treat</button>
+        <button class="btn" onclick="doDismiss('${a.id}')">Dismiss</button>
+      </div>
+    </div>`;
+}
+
+function showPopup(a){
+  popId=a.id;
+  $('pp-name').textContent=a.patient;
+  $('pp-pid').textContent=`${a.pid} · ${a.id}`;
+  $('pp-param').textContent=a.parameter||'Critical finding';
+  $('pp-reason').textContent=a.reason||'—';
+  // Image in popup
+  const imgWrap=$('pp-img-wrap');
+  if(a.image_filename){
+    const viewUrl=`${FLASK}/view_image/${encodeURIComponent(a.image_filename)}`;
+    const dlUrl=`${FLASK}/download_image/${encodeURIComponent(a.image_filename)}`;
+    $('pp-img').src=viewUrl;
+    $('pp-view-btn').href=viewUrl;
+    $('pp-dl-btn').href=dlUrl;
+    imgWrap.style.display='block';
+  } else {
+    imgWrap.style.display='none';
+  }
+  $('overlay').classList.add('show');
+}
+function ackPopup(){if(popId)doAck(popId);$('overlay').classList.remove('show');popId=null;}
+function closePopup(){$('overlay').classList.remove('show');popId=null;}
+
+async function doAck(id){
+  try{await fetch(`${FLASK}/ack_alert/${id}`,{method:'POST'});}catch(e){}
+  const a=alerts.find(x=>x.id===id);
+  if(a){a.status='acked';auditLog.push({ts:Date.now()/1000,msg:`Alert ${id} acknowledged — ${a.patient}`});}
+  refresh(); if(selId===id)selAlert(id); toast('Acknowledged — '+(a?.patient||id));
+}
+function doDismiss(id){
+  const a=alerts.find(x=>x.id===id); if(a)a.status='dismissed';
+  selId=null;
+  $('detail').innerHTML='<div class="empty" style="padding-top:36px"><div class="empty-icon">🔔</div><div class="empty-txt">Select an alert to view details</div></div>';
+  refresh();
+}
+function refresh(){
+  const active=alerts.filter(a=>a.status==='unacked');
+  const crits=alerts.filter(a=>a.severity==='critical'&&a.status==='unacked');
+  const acked=alerts.filter(a=>a.status==='acked');
+  $('s-active').textContent=active.length;$('s-crit').textContent=crits.length;
+  $('s-acked').textContent=acked.length;$('s-total').textContent=alerts.length;
+  const p=$('cpill');p.textContent=crits.length+' Critical';p.classList.toggle('show',crits.length>0);
+  renderList();
+}
+function renderLog(){
+  const el=$('log-list');
+  if(!auditLog.length){el.innerHTML='<div class="empty"><div class="empty-txt">No audit events yet</div></div>';return;}
+  el.innerHTML=[...auditLog].reverse().map(e=>`<div class="log-row"><span class="log-ts">${fmtT(e.ts)}</span><span>${e.msg}</span></div>`).join('');
+}
+function switchTab(t){
+  $('tq').classList.toggle('act',t==='q');$('tl').classList.toggle('act',t==='l');
+  $('vq').style.display=t==='q'?'':'none';$('vl').style.display=t==='l'?'':'none';
+  if(t==='l')renderLog();
+}
+async function poll(){
+  try{
+    const data=await fetch(`${FLASK}/get_alerts`).then(r=>{
+      if(r.status===401){window.location.href='/doctor/login';return[];}
+      return r.json();
+    });
+    $('cdot').className='conn-dot'; $('ctxt').textContent='Connected';
+    let gotNew=false;
+    data.forEach(a=>{
+      if(!knownIds.has(a.id)){
+        knownIds.add(a.id);gotNew=true;
+        auditLog.push({ts:a.timestamp,msg:`Alert ${a.id} received — ${a.patient} · ${a.source}`});
+        if(a.severity==='critical'&&a.status==='unacked')setTimeout(()=>showPopup(a),400);
+      } else {
+        const ex=alerts.find(x=>x.id===a.id);if(ex)ex.status=a.status;
+      }
+    });
+    alerts=data; refresh(); if(gotNew)renderLog();
+  }catch(e){
+    $('cdot').className='conn-dot off'; $('ctxt').textContent='Flask offline…';
+  }
+}
+poll(); setInterval(poll,3000); refresh();
+</script>
+</body>
+</html>

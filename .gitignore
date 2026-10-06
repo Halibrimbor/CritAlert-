@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+ENV/
+
+# Environment files
+.env
+.env.*
+
+# Model files (optional if you want to keep them locally but not commit)
+# *.h5
+# *.keras
+
+# User uploads
+uploads/*
+!uploads/.gitkeep
+
+# Local runtime data
+pending_alerts.json
+*.log
+
+# IDE/editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CritAlert — Path Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f3f4f8;--card:#fff;--card2:#f8f9fc;
+  --border:#e0e4ef;--border2:#c5ccdc;
+  --text:#101828;--t2:#374151;--muted:#6b7280;--muted2:#9ca3af;
+  --red:#d92d20;--red-s:#fff1f0;--red-b:#ffc9c5;
+  --green:#027a48;--grn-s:#ecfdf3;--grn-b:#abefc6;--grn-m:#17b26a;
+  --blue:#1849a9;--blu-s:#eff4ff;--blu-b:#c7d7fd;
+  --r:10px;--sh:0 1px 3px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* ─ Header ─ */
+.hdr{background:var(--card);border-bottom:1px solid var(--border);height:58px;padding:0 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;box-shadow:var(--sh)}
+.logo{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:700;letter-spacing:-.4px}
+.logo-sq{width:30px;height:30px;background:var(--red);border-radius:7px;
+  display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800}
+.logo em{color:var(--red);font-style:normal}
+.hdr-mid{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.live{width:7px;height:7px;border-radius:50%;background:var(--grn-m);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.hdr-tag{font-size:11px;font-weight:600;padding:3px 11px;border-radius:20px;
+  background:#fff8ec;color:#b54708;border:1px solid #fedf89}
+
+/* ─ Page ─ */
+.page{max-width:720px;margin:0 auto;padding:28px 18px 72px}
+
+/* ─ Doctor link banner ─ */
+.doc-banner{
+  background:var(--blu-s);border:1px solid var(--blu-b);border-radius:var(--r);
+  padding:13px 18px;margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.db-left{display:flex;align-items:center;gap:10px}
+.db-icon{font-size:22px}
+.db-text{font-size:13px;font-weight:600;color:var(--blue)}
+.db-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.db-link{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;background:var(--blue);color:#fff;
+  border-radius:7px;font-size:12px;font-weight:700;
+  text-decoration:none;white-space:nowrap;transition:opacity .15s;
+}
+.db-link:hover{opacity:.85}
+
+/* ─ Upload card ─ */
+.upload-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:26px;box-shadow:var(--sh)}
+.uc-title{font-size:15px;font-weight:700;margin-bottom:3px}
+.uc-sub{font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.55}
+
+/* Report type selector */
+.type-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.type-opt{position:relative}
+.type-opt input{position:absolute;opacity:0;width:0;height:0}
+.type-label{
+  display:flex;align-items:center;gap:9px;
+  padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;
+  cursor:pointer;transition:all .15s;background:var(--card2);
+}
+.type-label:hover{border-color:var(--border2)}
+.type-opt input:checked + .type-label{
+  border-color:var(--red);background:var(--red-s);
+}
+.type-icon{font-size:20px;flex-shrink:0}
+.type-name{font-size:13px;font-weight:600}
+.type-desc{font-size:11px;color:var(--muted);margin-top:1px}
+
+/* Drop zone */
+.drop-zone{
+  border:2px dashed var(--border2);border-radius:var(--r);
+  background:var(--card2);padding:30px 20px;text-align:center;
+  cursor:pointer;position:relative;transition:all .18s;margin-bottom:16px;
+}
+.drop-zone:hover,.drop-zone.over{border-color:var(--red);background:var(--red-s)}
+.drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz-icon{font-size:34px;margin-bottom:9px}
+.dz-main{font-size:13px;font-weight:600;color:var(--t2);margin-bottom:3px}
+.dz-hint{font-size:11px;color:var(--muted2)}
+.dz-sel{display:none;margin-top:10px;padding:6px 12px;background:var(--blu-s);
+  border:1px solid var(--blu-b);border-radius:6px;font-size:12px;
+  font-weight:600;color:var(--blue);font-family:'IBM Plex Mono',monospace}
+
+.btn-run{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;
+  background:var(--red);color:#fff;border:none;border-radius:var(--r);
+  font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s}
+.btn-run:hover{background:#b42318}
+.btn-run:active{transform:scale(.97)}
+.btn-run:disabled{background:#d1d5db;cursor:not-allowed}
+
+/* Progress */
+.prog-wrap{display:none;margin-top:16px}
+.prog-top{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-bottom:6px}
+.spin{width:14px;height:14px;border:2px solid var(--blu-b);border-top-color:var(--blue);
+  border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.prog-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--red);border-radius:2px;width:0;
+  transition:width 3s ease-out}
+
+/* ─ Result ─ */
+.result-area{margin-top:22px}
+.result-card{
+  border-radius:var(--r);padding:18px 20px;margin-bottom:14px;
+  display:flex;align-items:flex-start;gap:13px;border:1px solid;
+}
+.result-card.crit{background:var(--red-s);border-color:var(--red-b)}
+.result-card.safe{background:var(--grn-s);border-color:var(--grn-b)}
+.rc-icon{font-size:26px;flex-shrink:0;margin-top:1px}
+.rc-body .rc-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+.result-card.crit .rc-tag{color:var(--red)}
+.result-card.safe .rc-tag{color:var(--green)}
+.rc-title{font-size:15px;font-weight:700;margin-bottom:6px}
+.result-card.crit .rc-title{color:var(--red)}
+.result-card.safe .rc-title{color:var(--green)}
+.rc-reason{font-size:13px;color:var(--t2);line-height:1.55}
+
+/* Image preview */
+.img-preview{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px;margin-bottom:14px;box-shadow:var(--sh);text-align:center;
+}
+.ip-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--muted);margin-bottom:10px;text-align:left}
+.ip-img{max-width:100%;max-height:340px;border-radius:6px;border:1px solid var(--border);
+  display:block;margin:0 auto}
+
+/* Alert dispatched */
+.alert-box{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--red);
+  border-radius:var(--r);padding:16px;box-shadow:var(--sh)}
+.ab-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--red);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ab-field .ak{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:2px}
+.ab-field .av{font-size:12px;font-weight:600;font-family:'IBM Plex Mono',monospace;color:var(--text)}
+.ab-field.full{grid-column:1/-1}
+.ab-reason{font-size:13px;font-weight:700;color:var(--red);background:var(--red-s);
+  padding:8px 12px;border-radius:6px;border:1px solid var(--red-b);
+  display:block;margin-top:3px;line-height:1.5}
+
+@media(max-width:540px){
+  .type-row{grid-template-columns:1fr}
+  .ab-grid{grid-template-columns:1fr}
+  .hdr{padding:0 14px}
+  .page{padding:18px 12px 56px}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo">
+    <div class="logo-sq">CA</div>
+    <span><em>Crit</em>Alert</span>
+  </div>
+  <div class="hdr-mid"><span class="live"></span>Path Lab · Live</div>
+  <div class="hdr-tag">🔬 Path Lab</div>
+</header>
+
+<div class="page">
+
+  <!-- Doctor portal link -->
+  <div class="doc-banner">
+    <div class="db-left">
+      <div class="db-icon">👨‍⚕️</div>
+      <div>
+        <div class="db-text">Doctor Dashboard</div>
+        <div class="db-sub">Critical alerts appear on the doctor portal in real time</div>
+      </div>
+    </div>
+    <a href="/doctor/login" class="db-link">Open Doctor Portal →</a>
+  </div>
+
+  <!-- Upload card -->
+  <div class="upload-card">
+    <div class="uc-title">Upload &amp; Analyze Report</div>
+    <p class="uc-sub">Upload an X-Ray or ECG image. The CNN model analyzes it and sends a critical alert to the doctor dashboard if a finding is detected.</p>
+
+    <form method="POST" enctype="multipart/form-data" id="form">
+
+      <!-- Report type selection -->
+      <div class="type-row">
+        <label class="type-opt">
+          <input type="radio" name="report_type" value="xray" checked>
+          <div class="type-label">
+            <div class="type-icon">🩻</div>
+            <div>
+              <div class="type-name">X-Ray Report</div>
+              <div class="type-desc">Chest X-ray · image_model.h5</div>
+            </div>
+          </div>
+        </label>
+        <label class="type-opt">
+          <input type="radio" name="report_type" value="ecg">
+          <div class="type-label">
+            <div class="type-icon">❤️</div>
+            <div>
+              <div class="type-name">ECG Report</div>
+              <div class="type-desc">Electrocardiogram · ecg_model.h5</div>
+            </div>
+          </div>
+        </label>
+        <label class="type-opt">
+          <input type="radio" name="report_type" value="ct">
+          <div class="type-label">
+            <div class="type-icon">🖥️</div>
+            <div>
+              <div class="type-name">CT Scan</div>
+              <div class="type-desc">Computed Tomography · ct_model.h5</div>
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <div class="drop-zone" id="dz">
+        <div class="dz-icon">🏥</div>
+        <div class="dz-main">Click to choose file or drag &amp; drop</div>
+        <div class="dz-hint">JPG · JPEG · PNG — Max 20 MB</div>
+        <input type="file" name="file" id="file-in"
+          accept=".jpg,.jpeg,.png" required onchange="onPick(this)">
+        <div class="dz-sel" id="dz-sel"></div>
+      </div>
+
+      <button type="submit" class="btn-run" id="sbtn">
+        ⚡ Analyze Report
+      </button>
+    </form>
+
+    <div class="prog-wrap" id="prog">
+      <div class="prog-top"><span class="spin"></span><span id="prog-txt">Analyzing…</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="pfill"></div></div>
+    </div>
+
+    {% if result %}
+    <div class="result-area">
+
+      <div class="result-card {% if is_critical %}crit{% else %}safe{% endif %}">
+        <div class="rc-icon">{% if is_critical %}🔴{% else %}🟢{% endif %}</div>
+        <div class="rc-body">
+          <div class="rc-tag">{{ report_type or "Analysis" }} Result</div>
+          <div class="rc-title">{% if is_critical %}CRITICAL FINDING DETECTED{% else %}NO CRITICAL FINDINGS{% endif %}</div>
+          <div class="rc-reason">{{ result }}</div>
+        </div>
+      </div>
+
+      {% if image_b64 %}
+      <div class="img-preview">
+        <div class="ip-title">Uploaded Image Preview</div>
+        <img class="ip-img" src="data:{{ image_mime }};base64,{{ image_b64 }}" alt="Uploaded report">
+      </div>
+      {% endif %}
+
+      {% if is_critical and alert_fired %}
+      <div class="alert-box">
+        <div class="ab-title">🔔 Alert Dispatched → Doctor Dashboard</div>
+        <div class="ab-grid">
+          <div class="ab-field"><div class="ak">Alert ID</div><div class="av">{{ alert_fired.id }}</div></div>
+          <div class="ab-field"><div class="ak">Patient ID</div><div class="av">{{ alert_fired.pid }}</div></div>
+          <div class="ab-field"><div class="ak">Display Name</div><div class="av">{{ alert_fired.patient }}</div></div>
+          <div class="ab-field"><div class="ak">Source</div><div class="av">{{ alert_fired.source }}</div></div>
+          <div class="ab-field full">
+            <div class="ak">⚠ Reason sent to doctor</div>
+            <span class="ab-reason">{{ alert_fired.reason }}</span>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+function onPick(inp){
+  if(!inp.files[0])return;
+  const f=inp.files[0];
+  const sel=document.getElementById('dz-sel');
+  sel.textContent=`📎  ${f.name}  (${(f.size/1024).toFixed(1)} KB)`;
+  sel.style.display='block';
+  document.getElementById('prog-txt').textContent=`Analyzing with CNN model…`;
+}
+// FIX: attach to form submit so button disable never blocks submission
+document.getElementById('form').addEventListener('submit', function(e) {
+  const inp = document.getElementById('file-in');
+  if (!inp.files || !inp.files[0]) { e.preventDefault(); return; }
+  // Let form submit, THEN disable button (after a tick)
+  setTimeout(function() {
+    const btn = document.getElementById('sbtn');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Analyzing…';
+    document.getElementById('prog').style.display = 'block';
+    setTimeout(function() {
+      document.getElementById('pfill').style.width = '82%';
+    }, 100);
+  }, 0);
+});
+function startLoad(){} // kept for safety — no longer used
+const dz=document.getElementById('dz');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');});
+</script>
+</body>
+</html>
