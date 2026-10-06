@@ -9,34 +9,27 @@
 
 </div>
 
-CritAlert is an AI-powered medical screening application designed to detect critical abnormalities in X-ray, ECG, and CT scan images using trained deep learning models. The project combines a Flask-based web interface, TensorFlow/Keras inference, and a doctor-facing alert dashboard to support clinical review workflows and early screening.
+CritAlert is an AI-powered medical screening system designed to detect critical abnormalities in X-ray, ECG, and CT scan images using trained deep learning models. The project combines a Flask web app, TensorFlow/Keras inference, and a doctor-facing alert dashboard to support healthcare triage and clinical review workflows.
 
 ## Overview
 
-The system allows a user to upload a medical report image, select the corresponding report type, and run it through the matching trained model. If the scan is classified as critical, the system generates an alert and stores it in a local alert list for doctors to review through a secure dashboard.
-
-This project is designed as a healthcare AI prototype that demonstrates how trained models can be integrated into a practical diagnostic support workflow.
+This project is a prototype healthcare AI solution. A user uploads a medical image, selects the correct report type, and the application loads the matching trained model to predict whether the scan is normal or critical. If a critical result is found, an alert is created and shown in the doctor dashboard.
 
 ## Why this project matters
 
-In clinical and diagnostic settings, early triage can reduce delays and improve attention to urgent cases. CritAlert helps simulate that workflow by enabling:
+Fast triage is essential in healthcare. CritAlert demonstrates how AI can support early detection by helping identify potentially urgent cases more quickly and routing them to clinicians for review.
 
-- AI-assisted screening of medical report images
-- faster detection of potentially critical findings
-- a structured alert system for doctors
-- a simple dashboard for reviewing alerts and images
-
-## Features
+## Key Features
 
 - X-ray abnormality detection
-- ECG abnormality detection
-- CT scan image analysis
+- ECG anomaly detection
+- CT scan analysis
 - Critical alert generation
-- Doctor login and alert dashboard
-- Local image upload and storage
-- Trained TensorFlow/Keras model inference
+- Secure doctor login and dashboard
+- Local image upload and report storage
+- Trained model inference using Keras/TensorFlow
 
-## Tech Stack
+## Technology Stack
 
 - Python
 - Flask
@@ -45,7 +38,7 @@ In clinical and diagnostic settings, early triage can reduce delays and improve 
 - Pillow
 - HTML / CSS / JavaScript
 
-## Project Structure
+## Repository Structure
 
 ```text
 Critalert_main/
@@ -56,34 +49,38 @@ Critalert_main/
 ├── LICENSE
 ├── start_critalert.bat
 ├── README_START.txt
-├── image_model.h5
-├── ecg_model.h5
-├── ct_scan_model.h5
-├── ecg_class_indices.json
-├── ct_class_indices.json
-├── pending_alerts.json
-├── uploads/
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── DEPLOYMENT.md
+│   ├── FEATURES.md
+│   └── SETUP_GUIDE.md
+├── models/
+│   ├── image_model.h5
+│   ├── ecg_model.h5
+│   ├── ct_scan_model.h5
+│   ├── ecg_class_indices.json
+│   └── ct_class_indices.json
+├── data/
+│   └── pending_alerts.json
+├── training/
+│   ├── train_image_model.py
+│   ├── train_ecg_model.py
+│   └── train_ct_model.py
 ├── templates/
 │   ├── index.html
 │   ├── doctor_login.html
 │   └── doctor_dashboard.html
-├── docs/
-│   ├── SETUP_GUIDE.md
-│   ├── ARCHITECTURE.md
-│   ├── FEATURES.md
-│   └── DEPLOYMENT.md
-├── ABOUT_THIS_PROJECT.md
-├── PROJECT_SUMMARY.md
+├── uploads/
+│   └── .gitkeep
 ├── PROJECT_BANNER.md
-├── train_image_model.py
-├── train_ecg_model.py
-├── train_ct_model.py
+├── PROJECT_SUMMARY.md
+├── ABOUT_THIS_PROJECT.md
 └── .gitignore
 ```
 
 ## Installation
 
-### 1. Clone the project
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/Halibrimbor/CritAlert-.git
@@ -120,63 +117,54 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-## Run the application
+## Run the project
 
 ```bash
 python app.py
 ```
 
-Then open the app in your browser:
+Then open:
 
-- Main app: http://localhost:5000
-- Doctor portal: http://localhost:5000/doctor/login
+- http://localhost:5000
+- http://localhost:5000/doctor/login
 
-## Default doctor credentials
+## Default doctor password
 
 ```text
-Password: doctor@1234
+doctor@1234
 ```
 
-## Quick start for Windows
+## Windows quick start
 
 Use the launcher file:
 
 - [start_critalert.bat](start_critalert.bat)
 
-This script checks whether the virtual environment exists, installs dependencies, and starts the web app.
+This script creates a virtual environment if missing, installs dependencies, and starts the app.
+
+## How it works
+
+1. Upload a medical report image.
+2. Select the type: X-ray, ECG, or CT.
+3. The app loads the matching trained model.
+4. The image is preprocessed and passed to the model.
+5. The prediction result is displayed in the web interface.
+6. If the result is critical, the doctor dashboard receives an alert.
 
 ## Medical use case
 
-CritAlert is intended as a prototype for healthcare AI workflows where medical images are reviewed quickly and critical findings are escalated to doctors. It is useful for research, demo purposes, academic projects, and workflow simulation.
+CritAlert is intended as a healthcare AI prototype for early screening and triage support. It can help simulate a workflow where urgent findings are surfaced sooner for human review.
 
-> Important: This project is a research and prototype system and should not be treated as a certified clinical diagnostic tool. Real-world clinical deployment requires validation, regulatory review, and expert oversight.
-
-## How the system works
-
-1. The user uploads a medical image.
-2. The appropriate model is selected based on the report type.
-3. The image is preprocessed and passed to TensorFlow/Keras inference.
-4. The model predicts whether the report is normal or critical.
-5. If critical, the app creates an alert.
-6. The doctor reviews the alert on the dashboard and can view the uploaded image.
-
-## Alert workflow
-
-- Upload patient image
-- Select X-ray, ECG, or CT
-- Run model inference
-- Read the analysis result
-- Review critical alerts in the doctor dashboard
-- Acknowledge alerts after evaluation
+> Important: This project is a research and demo prototype and should not be treated as a clinically validated medical diagnostic system.
 
 ## Future improvements
 
 - database-backed alert storage
-- secure backend authentication
+- secure production authentication
 - cloud deployment
 - DICOM support
-- advanced notification system
-- better model monitoring and explainability
+- more advanced notifications
+- explainability and confidence reporting
 
 ## License
 

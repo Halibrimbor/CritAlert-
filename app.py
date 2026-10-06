@@ -32,8 +32,11 @@ DOCTOR_PASSWORD_HASH = generate_password_hash("doctor@1234")
 
 # ── Storage ───────────────────────────────────────────────────────
 UPLOAD_FOLDER = "uploads"
-ALERTS_FILE   = "pending_alerts.json"
+ALERTS_FILE   = os.path.join("data", "pending_alerts.json")
+MODEL_DIR     = "models"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs("data", exist_ok=True)
+os.makedirs(MODEL_DIR, exist_ok=True)
 app.config["UPLOAD_FOLDER"]        = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"]   = 20 * 1024 * 1024  # 20 MB
 
@@ -90,7 +93,7 @@ def get_xray_model():
         return _xray_model
     if not TF_OK:
         return None
-    path = "image_model.h5"
+    path = os.path.join(MODEL_DIR, "image_model.h5")
     if not os.path.exists(path):
         print(f"✗ {path} not found")
         return None
@@ -111,7 +114,7 @@ def get_ecg_model():
         return _ecg_model
     if not TF_OK:
         return None
-    path = "ecg_model.h5"
+    path = os.path.join(MODEL_DIR, "ecg_model.h5")
     if not os.path.exists(path):
         print(f"✗ {path} not found")
         return None
@@ -131,7 +134,7 @@ def get_ct_model():
         return _ct_model
     if not TF_OK:
         return None
-    path = "ct_scan_model.h5"
+    path = os.path.join(MODEL_DIR, "ct_scan_model.h5")
     if not os.path.exists(path):
         print(f"✗ {path} not found")
         return None
@@ -264,7 +267,8 @@ def run_ct_inference(file_path: str):
 
         # Load class labels
         try:
-            with open("ct_class_indices.json", "r") as f:
+            class_index_path = os.path.join(MODEL_DIR, "ct_class_indices.json")
+            with open(class_index_path, "r") as f:
                 class_indices = json.load(f)
             labels = {v: k for k, v in class_indices.items()}
             label = labels[idx]
