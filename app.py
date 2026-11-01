@@ -1,5 +1,5 @@
 """
-CritAlert — app.py  (FIXED)
+CritAlert —-- app.py  (FIXED)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 BUGS FIXED:
   1. Duplicate get_ecg_model() — first def returned None always
